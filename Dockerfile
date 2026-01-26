@@ -28,7 +28,7 @@ COPY start-clawdbot.sh /usr/local/bin/start-clawdbot.sh
 RUN chmod +x /usr/local/bin/start-clawdbot.sh
 
 # Copy default configuration template
-# Build cache bust: 2026-01-26-v11
+# Build cache bust: 2026-01-26-v12
 COPY clawdbot.json.template /root/.clawdbot/clawdbot.json.template
 
 # Set working directory

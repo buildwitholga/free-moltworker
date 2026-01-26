@@ -102,9 +102,6 @@ EOFNODE
 echo "Starting Clawdbot Gateway..."
 echo "Gateway will be available on port 18789"
 
-# Increase Node.js heap size to avoid OOM
-export NODE_OPTIONS="--max-old-space-size=1024"
-
 # Set API keys as environment variables (clawdbot reads them from env)
 # Start the gateway (blocking)
 # Use provided token or generate a random one
