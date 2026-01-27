@@ -23,8 +23,9 @@ async function waitForProcess(proc: Process, timeoutMs: number = CLI_TIMEOUT_MS)
 }
 
 /**
- * API routes for device management and gateway control
- * Most routes are protected by Cloudflare Access
+ * API routes
+ * - /api/status - Public health check (no auth)
+ * - /api/admin/* - Protected admin routes (Cloudflare Access required)
  */
 const api = new Hono<AppEnv>();
 
@@ -52,11 +53,16 @@ api.get('/status', async (c) => {
   }
 });
 
-// Middleware: Verify Cloudflare Access JWT for all other API routes
-api.use('*', createAccessMiddleware({ type: 'json' }));
+/**
+ * Admin routes - all protected by Cloudflare Access
+ */
+const admin = new Hono<AppEnv>();
 
-// GET /api/devices - List pending and paired devices
-api.get('/devices', async (c) => {
+// Middleware: Verify Cloudflare Access JWT for all admin routes
+admin.use('*', createAccessMiddleware({ type: 'json' }));
+
+// GET /api/admin/devices - List pending and paired devices
+admin.get('/devices', async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
@@ -103,8 +109,8 @@ api.get('/devices', async (c) => {
   }
 });
 
-// POST /api/devices/:requestId/approve - Approve a pending device
-api.post('/devices/:requestId/approve', async (c) => {
+// POST /api/admin/devices/:requestId/approve - Approve a pending device
+admin.post('/devices/:requestId/approve', async (c) => {
   const sandbox = c.get('sandbox');
   const requestId = c.req.param('requestId');
 
@@ -140,8 +146,8 @@ api.post('/devices/:requestId/approve', async (c) => {
   }
 });
 
-// POST /api/devices/approve-all - Approve all pending devices
-api.post('/devices/approve-all', async (c) => {
+// POST /api/admin/devices/approve-all - Approve all pending devices
+admin.post('/devices/approve-all', async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
@@ -204,8 +210,8 @@ api.post('/devices/approve-all', async (c) => {
   }
 });
 
-// GET /api/storage - Get R2 storage status and last sync time
-api.get('/storage', async (c) => {
+// GET /api/admin/storage - Get R2 storage status and last sync time
+admin.get('/storage', async (c) => {
   const sandbox = c.get('sandbox');
   const hasCredentials = !!(
     c.env.R2_ACCESS_KEY_ID && 
@@ -250,8 +256,8 @@ api.get('/storage', async (c) => {
   });
 });
 
-// POST /api/storage/sync - Trigger a manual sync to R2
-api.post('/storage/sync', async (c) => {
+// POST /api/admin/storage/sync - Trigger a manual sync to R2
+admin.post('/storage/sync', async (c) => {
   const sandbox = c.get('sandbox');
   
   // Check if R2 is configured
@@ -299,8 +305,8 @@ api.post('/storage/sync', async (c) => {
   }
 });
 
-// POST /api/gateway/restart - Kill the current gateway and start a new one
-api.post('/gateway/restart', async (c) => {
+// POST /api/admin/gateway/restart - Kill the current gateway and start a new one
+admin.post('/gateway/restart', async (c) => {
   const sandbox = c.get('sandbox');
 
   try {
@@ -336,5 +342,8 @@ api.post('/gateway/restart', async (c) => {
     return c.json({ error: errorMessage }, 500);
   }
 });
+
+// Mount admin routes under /admin
+api.route('/admin', admin);
 
 export { api };

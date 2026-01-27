@@ -1,7 +1,7 @@
-// API client for device pairing endpoints
+// API client for admin endpoints
 // Authentication is handled by Cloudflare Access (JWT in cookies)
 
-const API_BASE = '/api';
+const API_BASE = '/api/admin';
 
 export interface PendingDevice {
   requestId: string;
