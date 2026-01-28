@@ -160,6 +160,25 @@ app.use('*', async (c, next) => {
   await next();
 });
 
+// Middleware: Cloudflare Access authentication for all routes except /cdp/*
+app.use('*', async (c, next) => {
+  const url = new URL(c.req.url);
+  
+  // Skip auth for CDP routes (uses shared secret auth)
+  if (url.pathname.startsWith('/cdp')) {
+    return next();
+  }
+  
+  // Determine response type based on Accept header
+  const acceptsHtml = c.req.header('Accept')?.includes('text/html');
+  const middleware = createAccessMiddleware({ 
+    type: acceptsHtml ? 'html' : 'json',
+    redirectOnMissing: acceptsHtml 
+  });
+  
+  return middleware(c, next);
+});
+
 // Health check endpoint (before starting moltbot)
 app.get('/sandbox-health', (c) => {
   return c.json({

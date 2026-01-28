@@ -10,6 +10,3 @@ export const STARTUP_TIMEOUT_MS = 180_000;
 
 /** Mount path for R2 persistent storage inside the container */
 export const R2_MOUNT_PATH = '/data/moltbot';
-
-/** TTL for JWKS cache (1 hour) */
-export const JWKS_CACHE_TTL_MS = 60 * 60 * 1000;

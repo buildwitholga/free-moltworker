@@ -67,17 +67,3 @@ export interface JWTPayload {
   sub: string;
   type: string;
 }
-
-/**
- * JSON Web Key
- */
-export interface JWK extends JsonWebKey {
-  kid?: string;
-}
-
-/**
- * JSON Web Key Set
- */
-export interface JWKS {
-  keys: JWK[];
-}
